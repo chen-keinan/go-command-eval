@@ -4,7 +4,7 @@
 
 # go-exec-eval
 
-Go-exec-eval is an open source which help to execute shell command and evaluate it results in a flexible ways 
+Go-exec-eval is an open source evaluate shell command actual results against expected in very flexible way  
 
 * [Installation](#installation)
 * [Usage](#usage)
