@@ -4,7 +4,7 @@
 
 # go-exec-eval
 
-Go Simple config is an open source which help to execute shell command and evaluate it results in a flexible ways 
+Go-exec-eval is an open source which help to execute shell command and evaluate it results in a flexible ways 
 
 * [Installation](#installation)
 * [Usage](#usage)
