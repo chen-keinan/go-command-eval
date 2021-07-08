@@ -9,7 +9,7 @@ GOIMPI=${GOPATH}/bin/impi
 GOTEST=$(GOCMD) test
 
 all:
-	$(info  "completed running make file for go-exec-eval")
+	$(info  "completed running make file for go-command-eval")
 fmt:
 	@go fmt ./...
 lint:

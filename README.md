@@ -2,9 +2,9 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/chen-keinan/go-simple-config/blob/master/LICENSE)
 [![Gitter](https://badges.gitter.im/beacon-sec/community.svg)](https://gitter.im/beacon-sec/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-# go-exec-eval
+# go-command-eval
 
-Go-exec-eval is an open source evaluate shell command actual results against expected in very flexible way  
+Go-command-eval is an open source evaluate shell command actual results against expected in very flexible way  
 
 * [Installation](#installation)
 * [Usage](#usage)
@@ -12,7 +12,7 @@ Go-exec-eval is an open source evaluate shell command actual results against exp
 ## Installation
 
 ```
-go get github.com/chen-keinan/go-exec-eval
+go get github.com/chen-keinan/go-command-eval
 ```
 
 ## Usage
