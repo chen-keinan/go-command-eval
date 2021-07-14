@@ -19,4 +19,4 @@ tidy:
 test:
 	$(GOTEST) ./... -coverprofile coverage.md fmt
 
-.PHONY: install-req fmt lint tidy test imports
+.PHONY: install-req fmt lint tidy test imports .
