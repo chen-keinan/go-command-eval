@@ -14,7 +14,7 @@ type Cmd struct {
 	command        Executor
 	log            *zap.Logger
 	commandParams  map[int][]string
-	commandEval    []string
+	commandExec    []string
 	evalExpr       string
 	cmdExprBuilder utils.CmdExprBuilder
 }
@@ -47,7 +47,7 @@ type IndexValue struct {
 }
 
 func (c *Cmd) execCommand(index int, prevResult []string, newRes []IndexValue) string {
-	cmd := c.commandEval[index]
+	cmd := c.commandExec[index]
 	paramArr, ok := c.commandParams[index]
 	if ok {
 		for _, param := range paramArr {
