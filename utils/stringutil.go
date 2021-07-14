@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"github.com/chen-keinan/lxd-probe/internal/common"
+	"github.com/chen-keinan/go-command-eval/common"
 	"strconv"
 	"strings"
 )
