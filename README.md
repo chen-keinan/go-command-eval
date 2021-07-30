@@ -4,7 +4,7 @@
 
 # go-command-eval
 
-Go-command-eval is an open source evaluate shell command actual results against expected in very flexible way  
+Go-command-eval is an open source lib who evaluate shell command actual results against expected. 
 
 * [Installation](#installation)
 * [Usage](#usage)
