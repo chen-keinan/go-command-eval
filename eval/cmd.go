@@ -105,30 +105,32 @@ func (c *cmd) execShellCmd(prevResHolder []IndexValue, resArr []string, currComm
 }
 
 //evalExpression expression eval as cartesian product
-func (c *cmd) evalExpression(cmd string,
-	commandRes []string, commResSize int, permutationArr []string, testFailure int) int {
+func (c *cmd) evalExpression(commandRes []string, commResSize int, permutationArr []string, testFailure int) (int,error) {
 	if len(commandRes) == 0 {
-		return c.evalCommand(cmd, permutationArr, testFailure)
+		return c.evalCommand(permutationArr, testFailure)
 	}
 	outputs := strings.Split(utils.RemoveNewLineSuffix(commandRes[0]), "\n")
 	for _, o := range outputs {
 		permutationArr = append(permutationArr, o)
-		testFailure = c.evalExpression(cmd, commandRes[1:commResSize], commResSize-1, permutationArr, testFailure)
+		testFailure,err:= c.evalExpression(commandRes[1:commResSize], commResSize-1, permutationArr, testFailure)
+		if err != nil{
+			return testFailure,err
+		}
 		permutationArr = permutationArr[:len(permutationArr)-1]
 	}
-	return testFailure
+	return testFailure,nil
 }
 
-func (c *cmd) evalCommand(cmd string, permutationArr []string, testExec int) int {
+func (c *cmd) evalCommand(permutationArr []string, testExec int) (int,error) {
 	// build command expression with params
 	expr := c.cmdExprBuilder(permutationArr, c.evalExpr)
 	testExec++
 	// eval command expression
 	testSucceeded, err := evalCommandExpr(strings.ReplaceAll(expr, common.EmptyValue, ""))
 	if err != nil {
-		c.log.Info(fmt.Sprintf("failed to evaluate command expr %s for cmd  %s : err %s", expr, cmd, err.Error()))
+		return 0,fmt.Errorf("failed to evaluate command expr %s for : err %s", expr, err.Error())
 	}
-	return testExec - testSucceeded
+	return testExec - testSucceeded,nil
 }
 
 func evalCommandExpr(expr string) (int, error) {

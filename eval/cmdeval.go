@@ -1,6 +1,7 @@
 package eval
 
 type CmdEvaluator interface {
+	EvalCommand(commands []string, evalExpr string) CmdEvalResult
 }
 
 type commandEvaluate struct {
@@ -14,10 +15,11 @@ func New() CmdEvaluator {
 	return &commandEvaluate{}
 }
 
-func (cv commandEvaluate) EvalCommand(commands []string, evalExpr string) bool {
+func (cv commandEvaluate) EvalCommand(commands []string, evalExpr string) CmdEvalResult {
 	commandParams := CommandParams(commands)
-	cmdExec := cmd{commandParams: commandParams, commandExec: commands, evalExpr: evalExpr}
+	cmdExec := cmd{commandParams: commandParams, commandExec: commands, evalExpr: evalExpr ,command: NewShellExec()}
 	cv.evalCommand(commands, cmdExec)
+	return CmdEvalResult{}
 }
 
 func (cv commandEvaluate) evalCommand(commands []string, cmdExec cmd) {
@@ -26,4 +28,13 @@ func (cv commandEvaluate) evalCommand(commands []string, cmdExec cmd) {
 		res := cmdExec.execCommand(index, cmdTotalRes, make([]IndexValue, 0))
 		cmdTotalRes = append(cmdTotalRes, res)
 	}
+
+	// evaluate command result with expression
+	NumFailedTest := cmd.evalExpression(cmdTotalRes, len(cmdTotalRes), make([]string, 0), 0)
+}
+
+type CmdEvalResult struct {
+	Match       bool
+	CmdEvalExpr string
+	Error       error
 }
