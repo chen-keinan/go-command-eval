@@ -1,4 +1,4 @@
-package exec
+package eval
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-type Cmd struct {
+type cmd struct {
 	command        Executor
 	log            *zap.Logger
 	commandParams  map[int][]string
@@ -19,11 +19,8 @@ type Cmd struct {
 	cmdExprBuilder utils.CmdExprBuilder
 }
 
-func New() *Cmd {
-	return &Cmd{}
-}
 
-func (c *Cmd) addDummyCommandResponse(expr string, index int, n string) string {
+func (c *cmd) addDummyCommandResponse(expr string, index int, n string) string {
 	if n == "[^\"]\\S*'\n" || n == "" || n == common.EmptyValue {
 		spExpr := utils.SeparateExpr(expr)
 		for _, expr := range spExpr {
@@ -46,14 +43,14 @@ type IndexValue struct {
 	value string
 }
 
-func (c *Cmd) execCommand(index int, prevResult []string, newRes []IndexValue) string {
-	cmd := c.commandExec[index]
+func (c *cmd) execCommand(index int, prevResult []string, newRes []IndexValue) string {
+	currentCmd := c.commandExec[index]
 	paramArr, ok := c.commandParams[index]
 	if ok {
 		for _, param := range paramArr {
 			paramNum, err := strconv.Atoi(param)
 			if err != nil {
-				c.log.Info(fmt.Sprintf("failed to convert param for command %s", cmd))
+				c.log.Info(fmt.Sprintf("failed to convert param for command %s", currentCmd))
 				continue
 			}
 			if paramNum < len(prevResult) {
@@ -61,21 +58,21 @@ func (c *Cmd) execCommand(index int, prevResult []string, newRes []IndexValue) s
 				newRes = append(newRes, IndexValue{index: paramNum, value: n})
 			}
 		}
-		commandRes := c.execCmdWithParams(newRes, len(newRes), make([]IndexValue, 0), cmd, make([]string, 0))
+		commandRes := c.execCmdWithParams(newRes, len(newRes), make([]IndexValue, 0), currentCmd, make([]string, 0))
 		sb := strings.Builder{}
 		for _, cr := range commandRes {
 			sb.WriteString(utils.AddNewLineToNonEmptyStr(cr))
 		}
 		return sb.String()
 	}
-	result, _ := c.command.Exec(cmd)
+	result, _ := c.command.Exec(currentCmd)
 	if result.Stderr != "" {
-		c.log.Info(fmt.Sprintf("Failed to execute command %s\n %s", result.Stderr, cmd))
+		c.log.Info(fmt.Sprintf("Failed to execute command %s\n %s", result.Stderr, currentCmd))
 	}
 	return c.addDummyCommandResponse(c.evalExpr, index, result.Stdout)
 }
 
-func (c *Cmd) execCmdWithParams(arr []IndexValue, index int, prevResHolder []IndexValue, currCommand string, resArr []string) []string {
+func (c *cmd) execCmdWithParams(arr []IndexValue, index int, prevResHolder []IndexValue, currCommand string, resArr []string) []string {
 	if len(arr) == 0 {
 		return c.execShellCmd(prevResHolder, resArr, currCommand, c.command)
 	}
@@ -88,7 +85,7 @@ func (c *Cmd) execCmdWithParams(arr []IndexValue, index int, prevResHolder []Ind
 	return resArr
 }
 
-func (c *Cmd) execShellCmd(prevResHolder []IndexValue, resArr []string, currCommand string, se Executor) []string {
+func (c *cmd) execShellCmd(prevResHolder []IndexValue, resArr []string, currCommand string, se Executor) []string {
 	for _, param := range prevResHolder {
 		if param.value == common.EmptyValue || param.value == common.NotValidNumber || param.value == "" {
 			resArr = append(resArr, param.value)
@@ -108,7 +105,7 @@ func (c *Cmd) execShellCmd(prevResHolder []IndexValue, resArr []string, currComm
 }
 
 //evalExpression expression eval as cartesian product
-func (c *Cmd) evalExpression(cmd string,
+func (c *cmd) evalExpression(cmd string,
 	commandRes []string, commResSize int, permutationArr []string, testFailure int) int {
 	if len(commandRes) == 0 {
 		return c.evalCommand(cmd, permutationArr, testFailure)
@@ -122,7 +119,7 @@ func (c *Cmd) evalExpression(cmd string,
 	return testFailure
 }
 
-func (c *Cmd) evalCommand(cmd string, permutationArr []string, testExec int) int {
+func (c *cmd) evalCommand(cmd string, permutationArr []string, testExec int) int {
 	// build command expression with params
 	expr := c.cmdExprBuilder(permutationArr, c.evalExpr)
 	testExec++
@@ -148,4 +145,28 @@ func evalCommandExpr(expr string) (int, error) {
 		return 1, nil
 	}
 	return 0, nil
+}
+
+
+//CommandParams calculate command params map params inorder to inject prev. command result into next command
+// accept list of commands return location and result
+func CommandParams(commands []string) map[int][]string {
+	commandParams := make(map[int][]string)
+	for index, command := range commands {
+		findIndex(command, "#", index, commandParams)
+	}
+	return nil
+}
+
+// find all params in command to be replace with output
+func findIndex(s, c string, commandIndex int, locations map[int][]string) {
+	b := strings.Index(s, c)
+	if b == -1 {
+		return
+	}
+	if locations[commandIndex] == nil {
+		locations[commandIndex] = make([]string, 0)
+	}
+	locations[commandIndex] = append(locations[commandIndex], s[b+1:b+2])
+	findIndex(s[b+2:], c, commandIndex, locations)
 }

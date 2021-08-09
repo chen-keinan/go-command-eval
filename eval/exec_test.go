@@ -1,4 +1,4 @@
-package exec
+package eval
 
 import (
 	"github.com/stretchr/testify/assert"
