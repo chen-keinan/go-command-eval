@@ -19,7 +19,6 @@ type cmd struct {
 	cmdExprBuilder utils.CmdExprBuilder
 }
 
-
 func (c *cmd) addDummyCommandResponse(expr string, index int, n string) string {
 	if n == "[^\"]\\S*'\n" || n == "" || n == common.EmptyValue {
 		spExpr := utils.SeparateExpr(expr)
@@ -105,32 +104,32 @@ func (c *cmd) execShellCmd(prevResHolder []IndexValue, resArr []string, currComm
 }
 
 //evalExpression expression eval as cartesian product
-func (c *cmd) evalExpression(commandRes []string, commResSize int, permutationArr []string, testFailure int) (int,error) {
+func (c *cmd) evalExpression(commandRes []string, commResSize int, permutationArr []string, testFailure int) (int, error) {
 	if len(commandRes) == 0 {
 		return c.evalCommand(permutationArr, testFailure)
 	}
 	outputs := strings.Split(utils.RemoveNewLineSuffix(commandRes[0]), "\n")
 	for _, o := range outputs {
 		permutationArr = append(permutationArr, o)
-		testFailure,err:= c.evalExpression(commandRes[1:commResSize], commResSize-1, permutationArr, testFailure)
-		if err != nil{
-			return testFailure,err
+		testFailure, err := c.evalExpression(commandRes[1:commResSize], commResSize-1, permutationArr, testFailure)
+		if err != nil {
+			return testFailure, err
 		}
 		permutationArr = permutationArr[:len(permutationArr)-1]
 	}
-	return testFailure,nil
+	return testFailure, nil
 }
 
-func (c *cmd) evalCommand(permutationArr []string, testExec int) (int,error) {
+func (c *cmd) evalCommand(permutationArr []string, testExec int) (int, error) {
 	// build command expression with params
 	expr := c.cmdExprBuilder(permutationArr, c.evalExpr)
 	testExec++
 	// eval command expression
 	testSucceeded, err := evalCommandExpr(strings.ReplaceAll(expr, common.EmptyValue, ""))
 	if err != nil {
-		return 0,fmt.Errorf("failed to evaluate command expr %s for : err %s", expr, err.Error())
+		return 0, fmt.Errorf("failed to evaluate command expr %s for : err %s", expr, err.Error())
 	}
-	return testExec - testSucceeded,nil
+	return testExec - testSucceeded, nil
 }
 
 func evalCommandExpr(expr string) (int, error) {
@@ -148,7 +147,6 @@ func evalCommandExpr(expr string) (int, error) {
 	}
 	return 0, nil
 }
-
 
 //CommandParams calculate command params map params inorder to inject prev. command result into next command
 // accept list of commands return location and result
