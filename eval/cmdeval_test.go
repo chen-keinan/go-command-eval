@@ -12,7 +12,9 @@ func TestReverseString1(t *testing.T) {
 		evalExpr string
 		want     bool
 	}{
-		{name: "single command and evalExpr", cmd: []string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <= 1'"}, evalExpr: "'$0' == '/etc/hosts'", want: true},
+		{name: "single command and evalExpr match", cmd: []string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <= 1'"}, evalExpr: "'$0' == '/etc/hosts'", want: true},
+		{name: "two command and evalExpr match", cmd: []string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <= 1'","ls /etc/group | awk -F \" \" '{print $1}' |awk 'FNR <= 1'"}, evalExpr: "'$0' == '/etc/hosts'; && '$1' == '/etc/group';", want: true},
+		{name: "two command and evalExpr do not match", cmd: []string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <= 1'","ls /etc/group | awk -F \" \" '{print $1}' |awk 'FNR <= 1'"}, evalExpr: "'$0' == '/etc/hosts'; && '$1' == '/etc/group1';", want: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -112,7 +112,7 @@ func (c *cmd) evalExpression(commandRes []string, commResSize int, permutationAr
 	for _, o := range outputs {
 		permutationArr = append(permutationArr, o)
 		testFailure, err := c.evalExpression(commandRes[1:commResSize], commResSize-1, permutationArr, testFailure)
-		if err != nil {
+		if err != nil || testFailure > 0 {
 			return testFailure, err
 		}
 		permutationArr = permutationArr[:len(permutationArr)-1]
