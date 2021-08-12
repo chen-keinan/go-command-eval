@@ -155,7 +155,7 @@ func CommandParams(commands []string) map[int][]string {
 	for index, command := range commands {
 		findIndex(command, "#", index, commandParams)
 	}
-	return nil
+	return commandParams
 }
 
 // find all params in command to be replace with output
