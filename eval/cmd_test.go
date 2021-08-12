@@ -11,6 +11,7 @@ func TestCommandParams(t *testing.T) {
 		{name: "two command and one param", cmd: []string{" aaa", "bb #1"}, want: map[int][]string{1:{"1"}}},
 		{name: "two command and 2 params on 2 commands", cmd: []string{" aaa", "bb #1", "cc #2"}, want: map[int][]string{1:{"1"},2:{"2"}}},
 		{name: "two command and 2 params on one command", cmd: []string{" aaa", "bb #1", "cc #1 #2"}, want: map[int][]string{1:{"1"},2:{"1","2"}}},
+		{name: "two command no params", cmd: []string{" aaa", "bb ", "cc"}, want: map[int][]string{}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
