@@ -3,6 +3,8 @@ package eval
 import (
 	"fmt"
 	"github.com/chen-keinan/go-command-eval/utils"
+	"github.com/golang/mock/gomock"
+	"go.uber.org/zap"
 	"testing"
 )
 
@@ -62,6 +64,41 @@ func TestEvalExpression(t *testing.T) {
 			got, err := cmdEval.evalExpression(tt.commandRes, tt.commResSize, make([]string, 0), tt.testFailure)
 			if tt.want != got && err.Error() != tt.wantErr.Error() {
 				t.Errorf("evalExpression() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestExecCommand(t *testing.T) {
+	tests := []struct {
+		name          string
+		index         int
+		prevResult    []string
+		commandParams map[int][]string
+		commandExec   []string
+		newRes        []IndexValue
+		want          string
+		wantErr       error
+	}{
+		{name: "one command res and one param good", index: 0, prevResult: []string{}, commandParams: nil, commandExec: []string{"aaa"}, newRes: []IndexValue{}, want: "bbb", wantErr: fmt.Errorf("")},
+		{name: "two command res and one param bad", index: 0, prevResult: []string{}, commandParams: nil, commandExec: []string{"aaa"}, newRes: []IndexValue{}, want: "EmptyValue", wantErr: fmt.Errorf("failed to exec command")},
+	}
+	zlog, err := zap.NewProduction()
+	if err != nil {
+		t.Errorf("failed to instansiate logger")
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			executor := NewMockExecutor(ctrl)
+			for _, c := range tt.commandExec {
+				executor.EXPECT().Exec(c).Return(&CommandResult{Stdout: tt.want, Stderr: tt.wantErr.Error()}, nil).Times(1)
+			}
+			cmdEval := cmd{command: executor, commandParams: tt.commandParams, commandExec: tt.commandExec, log: zlog}
+			got := cmdEval.execCommand(tt.index, tt.prevResult, tt.newRes)
+			if tt.want != got {
+				t.Errorf("execCommand() = %v, want %v", got, tt.want)
 			}
 		})
 	}

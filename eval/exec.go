@@ -10,7 +10,7 @@ const ShellToUse = "bash"
 
 //Executor defines the interface for shell command executor
 //exec.go
-//go:generate mockgen -destination=../mocks/mock_Executor.go -package=mocks . Executor
+//go:generate mockgen -destination=./mock_Executor.go -package=eval . Executor
 type Executor interface {
 	Exec(command string) (*CommandResult, error)
 }

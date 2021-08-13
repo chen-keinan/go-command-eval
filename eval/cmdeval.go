@@ -2,6 +2,7 @@ package eval
 
 import (
 	"github.com/chen-keinan/go-command-eval/utils"
+	"go.uber.org/zap"
 )
 
 //CmdEvaluator interface expose one method to evaluate command with evalExpr
@@ -22,7 +23,11 @@ func New() CmdEvaluator {
 // return eval command result
 func (cv commandEvaluate) EvalCommand(commands []string, evalExpr string) CmdEvalResult {
 	commandParams := CommandParams(commands)
-	cmdExec := cmd{commandParams: commandParams, commandExec: commands, evalExpr: evalExpr, command: NewShellExec(), cmdExprBuilder: utils.UpdateCmdExprParam}
+	zlog, err := zap.NewProduction()
+	if err != nil {
+		return CmdEvalResult{}
+	}
+	cmdExec := cmd{commandParams: commandParams, commandExec: commands, evalExpr: evalExpr, command: NewShellExec(), cmdExprBuilder: utils.UpdateCmdExprParam, log: zlog}
 	val, err := cv.evalCommand(commands, cmdExec)
 	if err != nil {
 		return CmdEvalResult{Match: false, Error: err}
