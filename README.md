@@ -24,6 +24,6 @@ evalExpr:="'$0' == '/etc/hosts'"
 cmdEval:= New()
 cmdEvalResult:=cmdEval.EvalCommand(commands,evalExpr)
 if cmdEvalResult.Match {
-    fmt.Print("commmand result math eval expression")
+    fmt.Print("commmand result match eval expression")
 }
 ```
