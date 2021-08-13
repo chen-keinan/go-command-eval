@@ -16,3 +16,14 @@ go get github.com/chen-keinan/go-command-eval
 ```
 
 ## Usage
+### one shell command vs string eval value
+```
+commands:=[]string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <= 1'"}
+evalExpr:="'$0' == '/etc/hosts'"
+
+cmdEval:= New()
+cmdEvalResult:=cmdEval.EvalCommand(commands,evalExpr)
+if cmdEvalResult.Match {
+    fmt.Print("commmand result math eval expression")
+}
+```
