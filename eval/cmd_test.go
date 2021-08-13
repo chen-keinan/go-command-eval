@@ -1,6 +1,7 @@
 package eval
 
 import (
+	"fmt"
 	"github.com/chen-keinan/go-command-eval/utils"
 	"testing"
 )
@@ -50,13 +51,16 @@ func TestEvalExpression(t *testing.T) {
 		want        int
 		wantErr     error
 	}{
-		{name: "one command res and one param", commandRes: []string{"/etc/hosts"}, commResSize: 1, testFailure: 0, evalExpr: "'$0' == '/etc/hosts'", want: 0, wantErr: nil},
+		{name: "one command res and one param good", commandRes: []string{"/etc/hosts"}, commResSize: 1, testFailure: 0, evalExpr: "'$0' == '/etc/hosts'", want: 0, wantErr: nil},
+		{name: "one command res and one param bad", commandRes: []string{"/etc/hosts"}, commResSize: 1, testFailure: 0, evalExpr: "'$0' == '/etc/hosts1'", want: 1, wantErr: nil},
+		{name: "one command res and one param bad", commandRes: []string{"/etc/hosts"}, commResSize: 1, testFailure: 0, evalExpr: "'$0' == /etc/hosts", want: 0, wantErr: fmt.Errorf("failed to evaluate command expr '/etc/hosts' == /etc/hosts for : err Cannot transition token types from COMPARATOR [==] to MODIFIER [/]")},
+		{name: "two command res and one param good", commandRes: []string{"/etc/hosts", "/etc/groups"}, commResSize: 2, testFailure: 0, evalExpr: "'$0' == /etc/hosts && '$0' == /etc/groups", want: 0, wantErr: nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cmdEval := cmd{cmdExprBuilder: utils.UpdateCmdExprParam, evalExpr: tt.evalExpr}
 			got, err := cmdEval.evalExpression(tt.commandRes, tt.commResSize, make([]string, 0), tt.testFailure)
-			if tt.want != got && err != tt.wantErr {
+			if tt.want != got && err.Error() != tt.wantErr.Error() {
 				t.Errorf("evalExpression() = %v, want %v", got, tt.want)
 			}
 		})
