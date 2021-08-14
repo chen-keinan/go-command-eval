@@ -111,7 +111,8 @@ func (c *cmd) evalExpression(commandRes []string, commResSize int, permutationAr
 	outputs := strings.Split(utils.RemoveNewLineSuffix(commandRes[0]), "\n")
 	for _, o := range outputs {
 		permutationArr = append(permutationArr, o)
-		testFailure, err := c.evalExpression(commandRes[1:commResSize], commResSize-1, permutationArr, testFailure)
+		var err error
+		testFailure, err = c.evalExpression(commandRes[1:commResSize], commResSize-1, permutationArr, testFailure)
 		if err != nil || testFailure > 0 {
 			return testFailure, err
 		}

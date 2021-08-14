@@ -1,9 +1,14 @@
 package common
 
 const (
-	EmptyValue     = "EmptyValue"
-	GrepRegex      = "[^\"]\\S*'"
-	SingleValue    = "SingleValue"
+	//EmptyValue const
+	EmptyValue = "EmptyValue"
+	//GrepRegex const
+	GrepRegex = "[^\"]\\S*'"
+	//SingleValue const
+	SingleValue = "SingleValue"
+	//NotValidNumber const
 	NotValidNumber = "10000"
-	MultiValue     = "MultiValue"
+	//MultiValue const
+	MultiValue = "MultiValue"
 )

@@ -45,6 +45,7 @@ func (cv commandEvaluate) evalCommand(commands []string, cmdExec cmd) (int, erro
 	return cmdExec.evalExpression(cmdTotalRes, len(cmdTotalRes), make([]string, 0), 0)
 }
 
+//CmdEvalResult command result object
 type CmdEvalResult struct {
 	Match       bool
 	CmdEvalExpr string
