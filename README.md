@@ -51,7 +51,7 @@ evaluate command result with IN Clause eval expr
 evalExpr:="'${0}' IN ('afpovertcp.cfg','aliases')"
 ```
 
-### 1st shell command result pass as arg to next shell command 
+### shell command result passed as an arg to next shell command 
 
 pass 1st command result as an arg to 2nd command
 ```
