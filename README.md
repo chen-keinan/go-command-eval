@@ -17,7 +17,7 @@ go get github.com/chen-keinan/go-command-eval
 ```
 
 ## Usage
-### one shell command with single multiple result compared with string eval value
+### one shell command with single / multiple result compared with string eval value
 
 Executing shell command
 ```
@@ -27,6 +27,42 @@ Assigning match eval expr , ${0} is the result from 1st shell command to match
 ```
 evalExpr:="'${0}' == '/etc/hosts'"
 ```
+
+### multi shell command with single / multiple result compared with string eval value
+
+Executing shell command
+```
+commands:=[]string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <= 1'",
+                    "ls /etc/group | awk -F \" \" '{print $1}' |awk 'FNR <= 1'"}
+```
+Assigning match eval expr , ${0} is the result from 1st shell command to match
+```
+evalExpr:="'${0}' == '/etc/hosts'; && '${1}' == '/etc/group';"
+```
+
+### shell command  with IN Clause eval expr
+
+Executing shell command
+```
+commands:=[]string{"ls /etc | awk -F \" \" '{print $1}' |awk 'FNR <= 2'"}
+```
+Assigning match eval expr , ${0} is the result from 1st shell command to match
+```
+evalExpr:="'${0}' IN ('afpovertcp.cfg','aliases')"
+```
+
+### 1st shell command result pass as arg to next shell command 
+
+Executing shell command
+```
+commands:=[]string{"ls /etc/hosts | awk -F " " '{print $1}' |awk 'FNR <= 1'",
+                    "stat -f %A" ${0}}
+```
+Assigning match eval expr , ${0} is the result from 1st shell command to match
+```
+evalExpr:="'${0}' == '/etc/hosts'; && ${1} <= 766"
+```
+
 Full code example
 ```
 cmdEval:= New()
