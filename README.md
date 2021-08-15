@@ -9,6 +9,8 @@ Go-command-eval is an open source lib who evaluate shell command actual vs. expe
 
 * [Installation](#installation)
 * [Usage](#usage)
+* [Contribution](#Contribution)
+
 
 ## Installation
 
@@ -72,3 +74,7 @@ if cmdEvalResult.Match {
     fmt.Print("commmand result match eval expression")
 }
 ```
+
+
+## Contribution
+code contribution is welcome !! , contribution with passing tests and linter is more than welcome :)
