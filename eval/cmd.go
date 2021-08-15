@@ -90,7 +90,7 @@ func (c *cmd) execShellCmd(prevResHolder []IndexValue, resArr []string, currComm
 			resArr = append(resArr, param.value)
 			break
 		}
-		cmd := strings.ReplaceAll(currCommand, fmt.Sprintf("#%d", param.index), param.value)
+		cmd := strings.ReplaceAll(currCommand, fmt.Sprintf("${%d}", param.index), param.value)
 		result, _ := se.Exec(cmd)
 		if result.Stderr != "" {
 			c.log.Info(fmt.Sprintf("Failed to execute command %s", result.Stderr))
@@ -154,12 +154,12 @@ func evalCommandExpr(expr string) (int, error) {
 func CommandParams(commands []string) map[int][]string {
 	commandParams := make(map[int][]string)
 	for index, command := range commands {
-		findIndex(command, "#", index, commandParams)
+		findIndex(command, index, commandParams)
 	}
 	return commandParams
 }
 
-// find all params in command to be replace with output
+/*// find all params in command to be replace with output
 func findIndex(s, c string, commandIndex int, locations map[int][]string) {
 	b := strings.Index(s, c)
 	if b == -1 {
@@ -170,4 +170,17 @@ func findIndex(s, c string, commandIndex int, locations map[int][]string) {
 	}
 	locations[commandIndex] = append(locations[commandIndex], s[b+1:b+2])
 	findIndex(s[b+2:], c, commandIndex, locations)
+}*/
+
+// find all params in command to be replace with output
+func findIndex(s string, commandIndex int, locations map[int][]string) {
+	match, num := utils.ValidParam(s)
+	if !match {
+		return
+	}
+	if locations[commandIndex] == nil {
+		locations[commandIndex] = make([]string, 0)
+	}
+	locations[commandIndex] = append(locations[commandIndex], num)
+	findIndex(num, commandIndex, locations)
 }

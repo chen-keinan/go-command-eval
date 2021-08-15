@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"github.com/chen-keinan/go-command-eval/common"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -17,7 +18,8 @@ var UpdateCmdExprParam CmdExprBuilder = func(outputArr []string, expr string) st
 	sExpr := SeparateExpr(expr)
 	for _, exp := range sExpr {
 		for i, output := range outputArr {
-			if !strings.Contains(exp.Expr, "$") {
+			valid,_:=ValidParam(exp.Expr)
+			if !valid {
 				if i > 0 {
 					break
 				} else {
@@ -36,7 +38,7 @@ var UpdateCmdExprParam CmdExprBuilder = func(outputArr []string, expr string) st
 //parseMultiValue build evaluation expresion for expr with IN clause
 var parseMultiValue EvaExprBuilderFunc = func(output string, index int, expr string) string {
 	//add condition value before split to array
-	variable := fmt.Sprintf("'$%s'", strconv.Itoa(index))
+	variable := fmt.Sprintf("'${%s}'", strconv.Itoa(index))
 	if strings.Contains(expr, variable) {
 		fOutPut := fmt.Sprintf("'%s'", output)
 		return strings.ReplaceAll(expr, variable, fOutPut)
@@ -60,13 +62,13 @@ func buildInClauseExpr(sOutPut []string, index int, expr string) string {
 			builderOne.WriteString("'" + val + "'")
 		}
 	}
-	return strings.ReplaceAll(expr, fmt.Sprintf("$%d", index), builderOne.String())
+	return strings.ReplaceAll(expr, fmt.Sprintf("${%d}", index), builderOne.String())
 }
 
 //changeExprFromMultiToSingle it change the expression from multi to single
 // where IN clause has only one param
 func changeExprFromMultiToSingle(expr string, index int, sOutout string) string {
-	variable := fmt.Sprintf("($%s)", strconv.Itoa(index))
+	variable := fmt.Sprintf("(${%s})", strconv.Itoa(index))
 	fOutPut := fmt.Sprintf("'%s'", sOutout)
 	if strings.Contains(expr, "IN") {
 		expr = strings.ReplaceAll(expr, "IN", "==")
@@ -82,7 +84,7 @@ var parseSingleValue EvaExprBuilderFunc = func(output string, index int, expr st
 	if strings.Contains(output, common.GrepRegex) {
 		output = ""
 	}
-	varaible := fmt.Sprintf("$%s", strconv.Itoa(index))
+	varaible := fmt.Sprintf("${%s}", strconv.Itoa(index))
 	return strings.ReplaceAll(expr, varaible, output)
 }
 
@@ -94,7 +96,8 @@ func SeparateExpr(expr string) []Expr {
 		if len(s) == 0 {
 			continue
 		}
-		if strings.Contains(s, "IN") && strings.Contains(s, "$") {
+		valid,_:=ValidParam(s)
+		if strings.Contains(s, "IN") && valid {
 			exprList = append(exprList, Expr{Type: common.MultiValue, Expr: s, EvaExprBuilderFunc: parseMultiValue})
 		} else {
 			exprList = append(exprList, Expr{Type: common.SingleValue, Expr: s, EvaExprBuilderFunc: parseSingleValue})
@@ -148,4 +151,15 @@ func AddNewLineToNonEmptyStr(str string) string {
 		return fmt.Sprintf("%s\n", str)
 	}
 	return str
+}
+
+func ValidParam(param string) (bool, string) {
+	start := strings.Index(param, "${")
+	end := strings.Index(param, "}")
+	if start == -1 || end == -1 {
+		return false, "0"
+	}
+	num := param[start+2 : end]
+	NumRegexp := regexp.MustCompile(`\d`)
+	return NumRegexp.MatchString(num), num
 }

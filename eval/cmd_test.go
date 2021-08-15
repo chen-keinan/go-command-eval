@@ -14,9 +14,9 @@ func TestCommandParams(t *testing.T) {
 		cmd  []string
 		want map[int][]string
 	}{
-		{name: "two command and one param", cmd: []string{" aaa", "bb #1"}, want: map[int][]string{1: {"1"}}},
-		{name: "two command and 2 params on 2 commands", cmd: []string{" aaa", "bb #1", "cc #2"}, want: map[int][]string{1: {"1"}, 2: {"2"}}},
-		{name: "two command and 2 params on one command", cmd: []string{" aaa", "bb #1", "cc #1 #2"}, want: map[int][]string{1: {"1"}, 2: {"1", "2"}}},
+		{name: "two command and one param", cmd: []string{" aaa", "bb ${1}"}, want: map[int][]string{1: {"1"}}},
+		{name: "two command and 2 params on 2 commands", cmd: []string{" aaa", "bb ${1}", "cc ${2}"}, want: map[int][]string{1: {"1"}, 2: {"2"}}},
+		{name: "two command and 2 params on one command", cmd: []string{" aaa", "bb ${1}", "cc ${1} ${2}"}, want: map[int][]string{1: {"1"}, 2: {"1", "2"}}},
 		{name: "two command no params", cmd: []string{" aaa", "bb ", "cc"}, want: map[int][]string{}},
 	}
 	for _, tt := range tests {
@@ -53,10 +53,10 @@ func TestEvalExpression(t *testing.T) {
 		want        int
 		wantErr     error
 	}{
-		{name: "one command res and one param good", commandRes: []string{"/etc/hosts"}, commResSize: 1, testFailure: 0, evalExpr: "'$0' == '/etc/hosts'", want: 0, wantErr: nil},
-		{name: "one command res and one param bad", commandRes: []string{"/etc/hosts"}, commResSize: 1, testFailure: 0, evalExpr: "'$0' == '/etc/hosts1'", want: 1, wantErr: nil},
-		{name: "one command res and one param bad", commandRes: []string{"/etc/hosts"}, commResSize: 1, testFailure: 0, evalExpr: "'$0' == /etc/hosts", want: 0, wantErr: fmt.Errorf("failed to evaluate command expr '/etc/hosts' == /etc/hosts for : err Cannot transition token types from COMPARATOR [==] to MODIFIER [/]")},
-		{name: "two command res and one param good", commandRes: []string{"/etc/hosts", "/etc/groups"}, commResSize: 2, testFailure: 0, evalExpr: "'$0' == /etc/hosts && '$0' == /etc/groups", want: 0, wantErr: nil},
+		{name: "one command res and one param good", commandRes: []string{"/etc/hosts"}, commResSize: 1, testFailure: 0, evalExpr: "'${0}' == '/etc/hosts'", want: 0, wantErr: nil},
+		{name: "one command res and one param bad", commandRes: []string{"/etc/hosts"}, commResSize: 1, testFailure: 0, evalExpr: "'${0}' == '/etc/hosts1'", want: 1, wantErr: nil},
+		{name: "one command res and one param bad", commandRes: []string{"/etc/hosts"}, commResSize: 1, testFailure: 0, evalExpr: "'${0}' == /etc/hosts", want: 0, wantErr: fmt.Errorf("failed to evaluate command expr '/etc/hosts' == /etc/hosts for : err Cannot transition token types from COMPARATOR [==] to MODIFIER [/]")},
+		{name: "two command res and one param good", commandRes: []string{"/etc/hosts", "/etc/groups"}, commResSize: 2, testFailure: 0, evalExpr: "'${0}' == /etc/hosts && '${0}' == /etc/groups", want: 0, wantErr: nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
