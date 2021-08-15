@@ -23,19 +23,19 @@ Executing shell command
 ```
 commands:=[]string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <= 1'"}
 ```
-Assigning match eval expr , ${0} is the result from 1st shell command to match 
+evaluate command result with eval expr ( ${0} is the result from 1st shell command) 
 ```
 evalExpr:="'${0}' == '/etc/hosts'"
 ```
 
 ### multi shell command with single / multiple result compared with string eval value
 
-Executing shell command
+Executing two shell commands
 ```
 commands:=[]string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <= 1'",
                     "ls /etc/group | awk -F \" \" '{print $1}' |awk 'FNR <= 1'"}
 ```
-Assigning match eval expr , ${0} is the result from 1st shell command to match
+evaluate both shell command results with eval expr ${0} is the 1st / ${1} is the 2nd shell commands results
 ```
 evalExpr:="'${0}' == '/etc/hosts'; && '${1}' == '/etc/group';"
 ```
@@ -46,19 +46,19 @@ Executing shell command
 ```
 commands:=[]string{"ls /etc | awk -F \" \" '{print $1}' |awk 'FNR <= 2'"}
 ```
-Assigning match eval expr , ${0} is the result from 1st shell command to match
+evaluate command result with IN Clause eval expr
 ```
 evalExpr:="'${0}' IN ('afpovertcp.cfg','aliases')"
 ```
 
 ### 1st shell command result pass as arg to next shell command 
 
-Executing shell command
+pass 1st command result as an arg to 2nd command
 ```
 commands:=[]string{"ls /etc/hosts | awk -F " " '{print $1}' |awk 'FNR <= 1'",
                     "stat -f %A" ${0}}
 ```
-Assigning match eval expr , ${0} is the result from 1st shell command to match
+eval both 1st and 2nd command result with eval expr
 ```
 evalExpr:="'${0}' == '/etc/hosts'; && ${1} <= 766"
 ```
