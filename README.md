@@ -17,48 +17,49 @@ go get github.com/chen-keinan/go-command-eval
 ```
 
 ## Usage
-### one shell command with single / multiple result compared with string eval value
+### one shell command with single result evaluated against eval expression
 
-Executing shell command
+create shell command which return one result
 ```
 commands:=[]string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <= 1'"}
 ```
-evaluate command result with eval expr ( ${0} is the result from 1st shell command) 
+evaluate command result with eval expression ( ${0} is the result from 1st shell command) 
 ```
 evalExpr:="'${0}' == '/etc/hosts'"
 ```
 
-### multi shell command with single / multiple result compared with string eval value
+### two shell commands with single result each evaluated with eval expression
 
-Executing two shell commands
+create two shell commands with one result for each
 ```
 commands:=[]string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <= 1'",
                     "ls /etc/group | awk -F \" \" '{print $1}' |awk 'FNR <= 1'"}
 ```
-evaluate both shell command results with eval expr ${0} is the 1st / ${1} is the 2nd shell commands results
+evaluate each command result with eval expression
 ```
 evalExpr:="'${0}' == '/etc/hosts'; && '${1}' == '/etc/group';"
 ```
 
-### shell command  with IN Clause eval expr
+### shell command return two results evaluated with IN Clause eval expression
 
-Executing shell command
+create shell command with return two results
 ```
 commands:=[]string{"ls /etc | awk -F \" \" '{print $1}' |awk 'FNR <= 2'"}
 ```
-evaluate command result with IN Clause eval expr
+evaluate command result with IN Clause eval expression
 ```
 evalExpr:="'${0}' IN ('afpovertcp.cfg','aliases')"
 ```
 
-### shell command result passed as an arg to next shell command 
+### shell command result passed as an arg to the following shell command; both results are evaluated against eval expression
 
-pass 1st command result as an arg to 2nd command
+create tow shell commands 1st command result passed as an arg to the following shell command
 ```
 commands:=[]string{"ls /etc/hosts | awk -F " " '{print $1}' |awk 'FNR <= 1'",
                     "stat -f %A" ${0}}
 ```
-eval both 1st and 2nd command result with eval expr
+both results are evaluated against eval expression 1st result is evaluated as string 
+2nd result is evaluated as an Integer
 ```
 evalExpr:="'${0}' == '/etc/hosts'; && ${1} <= 766"
 ```
