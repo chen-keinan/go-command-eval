@@ -16,7 +16,7 @@ go get github.com/chen-keinan/go-command-eval
 ```
 
 ## Usage
-### one shell command vs string eval value
+### one shell command with single multiple result compared with string eval value
 
 Executing shell command
 ```
