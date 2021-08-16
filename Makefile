@@ -2,10 +2,6 @@ SHELL := /bin/bash
 
 GOCMD=go
 GOMOD=$(GOCMD) mod
-GOBUILD=$(GOCMD) build
-GOLINT=${GOPATH}/bin/golangci-lint
-GORELEASER=/usr/local/bin/goreleaser
-GOIMPI=${GOPATH}/bin/impi
 GOTEST=$(GOCMD) test
 
 all:
