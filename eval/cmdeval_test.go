@@ -5,7 +5,7 @@ import (
 )
 
 func TestEvalCommand(t *testing.T) {
-	res := New()
+	res := NewEvalCmd()
 	tests := []struct {
 		name     string
 		cmd      []string

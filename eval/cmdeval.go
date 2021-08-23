@@ -13,8 +13,8 @@ type CmdEvaluator interface {
 type commandEvaluate struct {
 }
 
-//New instansiate new command evaluator
-func New() CmdEvaluator {
+//NewEvalCmd instantiate new command evaluator
+func NewEvalCmd() CmdEvaluator {
 	return &commandEvaluate{}
 }
 
