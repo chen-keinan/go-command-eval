@@ -74,7 +74,7 @@ shellCommands := []string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <
 		
 evalExpr := "'${0}' == '/etc/hosts'; && '${1}' == '/etc/group';"
 
-cmdEvalResult := NewEvalCmd().EvalCommand(commands, evalExpr)
+cmdEvalResult := NewEvalCmd().EvalCommand(shellCommands, evalExpr)
 if cmdEvalResult.Match {
     fmt.Print("commmand result match eval expression")
 }
