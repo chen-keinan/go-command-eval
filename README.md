@@ -6,7 +6,7 @@
 <br><img src="./pkg/img/cmd_eval.png" width="300" alt="cmd_eval logo"><br>
 # go-command-eval
 
-Go-command-eval is an open source lib who evaluate shell command actual vs. expected results.
+Go-command-eval is an open source lib who evaluate shell command results against eval expr.
 
 * [Installation](#installation)
 * [Usage](#usage)
