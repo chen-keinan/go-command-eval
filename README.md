@@ -69,14 +69,22 @@ evalExpr := "'${0}' == '/etc/hosts'; && ${1} <= 766"
 
 Full code example
 ```
-shellCommands := []string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <= 1'",
-		"ls /etc/group | awk -F \" \" '{print $1}' |awk 'FNR <= 1'"}
-		
-evalExpr := "'${0}' == '/etc/hosts'; && '${1}' == '/etc/group';"
+package main
 
-cmdEvalResult := NewEvalCmd().EvalCommand(shellCommands, evalExpr)
-if cmdEvalResult.Match {
-    fmt.Print("commmand result match eval expression")
+import (
+	"fmt"
+	"github.com/chen-keinan/go-command-eval/eval"
+)
+
+func main() {
+	shellCommands := []string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <= 1'",
+		"ls /etc/group | awk -F \" \" '{print $1}' |awk 'FNR <= 1'"}
+
+	evalExpr := "'${0}' == '/etc/hosts'; && '${1}' == '/etc/group';"
+	cmdEvalResult := eval.NewEvalCmd().EvalCommand(shellCommands, evalExpr)
+	if cmdEvalResult.Match {
+		fmt.Print("commmand result match eval expression")
+	}
 }
 ```
 
