@@ -159,19 +159,6 @@ func CommandParams(commands []string) map[int][]string {
 	return commandParams
 }
 
-/*// find all params in command to be replace with output
-func findIndex(s, c string, commandIndex int, locations map[int][]string) {
-	b := strings.Index(s, c)
-	if b == -1 {
-		return
-	}
-	if locations[commandIndex] == nil {
-		locations[commandIndex] = make([]string, 0)
-	}
-	locations[commandIndex] = append(locations[commandIndex], s[b+1:b+2])
-	findIndex(s[b+2:], c, commandIndex, locations)
-}*/
-
 // find all params in command to be replace with output
 func findIndex(s string, commandIndex int, locations map[int][]string) {
 	match, num := utils.ValidParam(s)
