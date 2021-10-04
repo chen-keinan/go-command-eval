@@ -36,9 +36,9 @@ const policy = `package example
 default deny = false
 deny {
 	some i
-	input.request.kind.kind == "Pod"
-	image := input.request.object.spec.containers[i].image
-	not startswith(image, "alpine")
+	input.kind == "Pod"
+	image := input.spec.containers[i].image
+	not startswith(image, "kalpine")
 }`
 
 func TestEvalPolicy(t *testing.T) {
