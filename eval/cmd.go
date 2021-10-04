@@ -16,6 +16,7 @@ type cmd struct {
 	commandParams  map[int][]string
 	commandExec    []string
 	evalExpr       string
+	evalPolicy     string
 	cmdExprBuilder utils.CmdExprBuilder
 }
 
@@ -161,7 +162,7 @@ func CommandParams(commands []string) map[int][]string {
 
 // find all params in command to be replace with output
 func findIndex(s string, commandIndex int, locations map[int][]string) {
-	match, num := utils.ValidParam(s)
+	match, num := utils.ValidParamData(s)
 	if !match {
 		return
 	}
@@ -170,4 +171,10 @@ func findIndex(s string, commandIndex int, locations map[int][]string) {
 	}
 	locations[commandIndex] = append(locations[commandIndex], num)
 	findIndex(num, commandIndex, locations)
+}
+//PolicyData hold policy data for OPA evaluation
+type PolicyData struct {
+	policy       string
+	pkgName      string
+	propertyEval string
 }

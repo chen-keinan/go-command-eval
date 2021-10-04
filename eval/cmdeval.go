@@ -7,7 +7,7 @@ import (
 
 //CmdEvaluator interface expose one method to evaluate command with evalExpr
 type CmdEvaluator interface {
-	EvalCommand(commands []string, evalExpr string) CmdEvalResult
+	EvalCommand(commands []string, evalExpr string,policy ...string) CmdEvalResult
 }
 
 type commandEvaluate struct {
@@ -21,7 +21,7 @@ func NewEvalCmd() CmdEvaluator {
 //EvalCommand eval command with eval expr
 // accept command and evalExpr
 // return eval command result
-func (cv commandEvaluate) EvalCommand(commands []string, evalExpr string) CmdEvalResult {
+func (cv commandEvaluate) EvalCommand(commands []string, evalExpr string,policy ...string) CmdEvalResult {
 	commandParams := CommandParams(commands)
 	zlog, err := zap.NewProduction()
 	if err != nil {
