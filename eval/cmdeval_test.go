@@ -49,7 +49,7 @@ func TestEvalPolicy(t *testing.T) {
 		policy string
 		want   bool
 	}{
-		{name: "two command and evalExpr match", cmd: []string{"kubectl get pods --no-headers -o custom-columns=\":metadata.name\"",
+		{name: "two command and deny policy match", cmd: []string{"kubectl get pods --no-headers -o custom-columns=\":metadata.name\"",
 			"kubectl get pod ${0} -o json"},
 			policy: policy, want: true},
 	}
