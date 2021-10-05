@@ -2,7 +2,7 @@ package eval
 
 import (
 	"github.com/chen-keinan/go-command-eval/utils"
-	"github.com/chen-keinan/opa-policy-validate/validator"
+	"github.com/chen-keinan/go-opa-validate/validator"
 	"go.uber.org/zap"
 	"strings"
 )
