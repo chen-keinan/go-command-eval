@@ -42,7 +42,7 @@ type IndexValue struct {
 	value string
 }
 
-func (c *cmd) execCommand(index int, prevResult []string, newRes []IndexValue) string {
+func (c *cmd) execCommand(index int, prevResult []string, newRes []IndexValue) []string {
 	currentCmd := c.commandExec[index]
 	paramArr, ok := c.commandParams[index]
 	if ok {
@@ -58,17 +58,17 @@ func (c *cmd) execCommand(index int, prevResult []string, newRes []IndexValue) s
 			}
 		}
 		commandRes := c.execCmdWithParams(newRes, len(newRes), make([]IndexValue, 0), currentCmd, make([]string, 0))
-		sb := strings.Builder{}
+		returnRes := make([]string, 0)
 		for _, cr := range commandRes {
-			sb.WriteString(utils.AddNewLineToNonEmptyStr(cr))
+			returnRes = append(returnRes, utils.AddNewLineToNonEmptyStr(cr))
 		}
-		return sb.String()
+		return returnRes
 	}
 	result, _ := c.command.Exec(currentCmd)
 	if result.Stderr != "" {
 		c.log.Info(fmt.Sprintf("Failed to execute command %s\n %s", result.Stderr, currentCmd))
 	}
-	return c.addDummyCommandResponse(c.evalExpr, index, result.Stdout)
+	return []string{c.addDummyCommandResponse(c.evalExpr, index, result.Stdout)}
 }
 
 func (c *cmd) execCmdWithParams(arr []IndexValue, index int, prevResHolder []IndexValue, currCommand string, resArr []string) []string {
@@ -161,7 +161,7 @@ func CommandParams(commands []string) map[int][]string {
 
 // find all params in command to be replace with output
 func findIndex(s string, commandIndex int, locations map[int][]string) {
-	match, num := utils.ValidParam(s)
+	match, num := utils.ValidParamData(s)
 	if !match {
 		return
 	}

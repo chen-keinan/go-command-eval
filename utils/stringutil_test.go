@@ -119,7 +119,7 @@ func Test_AddNewLineToNonEmptyStr(t *testing.T) {
 
 //Test_ValidParam test
 func Test_ValidParam(t *testing.T) {
-	match, num := ValidParam("aaaaa ${2}bbbb ")
+	match, num := ValidParamData("aaaaa ${2}bbbb ")
 	assert.True(t, match)
 	assert.Equal(t, "2", num)
 

@@ -31,3 +31,33 @@ func TestEvalCommand(t *testing.T) {
 		})
 	}
 }
+
+const policy = `package example
+default deny = false
+deny {
+	some i
+	input.kind == "Pod"
+	image := input.spec.containers[i].image
+	not startswith(image, "kalpine")
+}`
+
+func TestEvalPolicy(t *testing.T) {
+	res := NewEvalCmd()
+	tests := []struct {
+		name   string
+		cmd    []string
+		policy string
+		want   bool
+	}{
+		{name: "two command and deny policy match", cmd: []string{"kubectl get pods --no-headers -o custom-columns=\":metadata.name\"",
+			"kubectl get pod ${0} -o json"},
+			policy: policy, want: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := res.EvalCommandPolicy(tt.cmd, tt.policy, "deny", 1); got.Match != tt.want {
+				t.Errorf("TestEvalPolicy() = %v, want %v err %v", got, tt.want, got.Error)
+			}
+		})
+	}
+}

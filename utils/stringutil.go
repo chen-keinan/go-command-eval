@@ -18,7 +18,7 @@ var UpdateCmdExprParam CmdExprBuilder = func(outputArr []string, expr string) st
 	sExpr := SeparateExpr(expr)
 	for _, exp := range sExpr {
 		for i, output := range outputArr {
-			valid, _ := ValidParam(exp.Expr)
+			valid, _ := ValidParamData(exp.Expr)
 			if !valid {
 				if i > 0 {
 					break
@@ -96,7 +96,7 @@ func SeparateExpr(expr string) []Expr {
 		if len(s) == 0 {
 			continue
 		}
-		valid, _ := ValidParam(s)
+		valid, _ := ValidParamData(s)
 		if strings.Contains(s, "IN") && valid {
 			exprList = append(exprList, Expr{Type: common.MultiValue, Expr: s, EvaExprBuilderFunc: parseMultiValue})
 		} else {
@@ -153,8 +153,8 @@ func AddNewLineToNonEmptyStr(str string) string {
 	return str
 }
 
-//ValidParam validate param char
-func ValidParam(param string) (bool, string) {
+//ValidParamData validate param char
+func ValidParamData(param string) (bool, string) {
 	start := strings.Index(param, "${")
 	end := strings.Index(param, "}")
 	if start == -1 || end == -1 {

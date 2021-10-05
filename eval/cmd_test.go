@@ -5,6 +5,7 @@ import (
 	"github.com/chen-keinan/go-command-eval/utils"
 	"github.com/golang/mock/gomock"
 	"go.uber.org/zap"
+	"strings"
 	"testing"
 )
 
@@ -97,7 +98,11 @@ func TestExecCommand(t *testing.T) {
 			}
 			cmdEval := cmd{command: executor, commandParams: tt.commandParams, commandExec: tt.commandExec, log: zlog}
 			got := cmdEval.execCommand(tt.index, tt.prevResult, tt.newRes)
-			if tt.want != got {
+			sb := strings.Builder{}
+			for _, s := range got {
+				sb.WriteString(s)
+			}
+			if tt.want != sb.String() {
 				t.Errorf("execCommand() = %v, want %v", got, tt.want)
 			}
 		})
