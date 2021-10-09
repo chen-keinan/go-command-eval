@@ -44,18 +44,22 @@ deny {
 func TestEvalPolicy(t *testing.T) {
 	res := NewEvalCmd()
 	tests := []struct {
-		name   string
-		cmd    []string
-		policy string
-		want   bool
+		name     string
+		cmd      []string
+		evalExpr string
+		policy   string
+		want     bool
 	}{
-		{name: "two command and deny policy match", cmd: []string{"kubectl get pods --no-headers -o custom-columns=\":metadata.name\"",
+		{name: "two command and deny policy match", evalExpr: "'${0}' != '';&& [${1} MATCH no_permission.policy QUERY example.deny]", cmd: []string{"kubectl get pods --no-headers -o custom-columns=\":metadata.name\"",
 			"kubectl get pod ${0} -o json"},
 			policy: policy, want: true},
+		{name: "two command and deny policy expr not match", evalExpr: "'${0}' == '';&& [${1} MATCH no_permission.policy QUERY example.deny]", cmd: []string{"kubectl get pods --no-headers -o custom-columns=\":metadata.name\"",
+			"kubectl get pod ${0} -o json"},
+			policy: policy, want: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := res.EvalCommandPolicy(tt.cmd, tt.policy, "deny", 1); got.Match != tt.want {
+			if got := res.EvalCommandPolicy(tt.cmd, tt.evalExpr, tt.policy); got.Match != tt.want {
 				t.Errorf("TestEvalPolicy() = %v, want %v err %v", got, tt.want, got.Error)
 			}
 		})

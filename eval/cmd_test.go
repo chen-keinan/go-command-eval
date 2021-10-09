@@ -61,8 +61,8 @@ func TestEvalExpression(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmdEval := cmd{cmdExprBuilder: utils.UpdateCmdExprParam, evalExpr: tt.evalExpr}
-			got, err := cmdEval.evalExpression(tt.commandRes, tt.commResSize, make([]string, 0), tt.testFailure)
+			cmdEval := cmd{cmdExprBuilder: utils.UpdateCmdExprParam}
+			got, err := cmdEval.evalExpression(tt.commandRes, tt.commResSize, make([]string, 0), tt.testFailure, tt.evalExpr)
 			if tt.want != got && err.Error() != tt.wantErr.Error() {
 				t.Errorf("evalExpression() = %v, want %v", got, tt.want)
 			}
@@ -97,7 +97,7 @@ func TestExecCommand(t *testing.T) {
 				executor.EXPECT().Exec(c).Return(&CommandResult{Stdout: tt.want, Stderr: tt.wantErr.Error()}, nil).Times(1)
 			}
 			cmdEval := cmd{command: executor, commandParams: tt.commandParams, commandExec: tt.commandExec, log: zlog}
-			got := cmdEval.execCommand(tt.index, tt.prevResult, tt.newRes)
+			got := cmdEval.execCommand(tt.index, tt.prevResult, tt.newRes, "")
 			sb := strings.Builder{}
 			for _, s := range got {
 				sb.WriteString(s)

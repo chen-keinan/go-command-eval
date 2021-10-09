@@ -15,7 +15,6 @@ type cmd struct {
 	log            *zap.Logger
 	commandParams  map[int][]string
 	commandExec    []string
-	evalExpr       string
 	cmdExprBuilder utils.CmdExprBuilder
 }
 
@@ -42,7 +41,7 @@ type IndexValue struct {
 	value string
 }
 
-func (c *cmd) execCommand(index int, prevResult []string, newRes []IndexValue) []string {
+func (c *cmd) execCommand(index int, prevResult []string, newRes []IndexValue, evalExpr string) []string {
 	currentCmd := c.commandExec[index]
 	paramArr, ok := c.commandParams[index]
 	if ok {
@@ -53,7 +52,7 @@ func (c *cmd) execCommand(index int, prevResult []string, newRes []IndexValue) [
 				continue
 			}
 			if paramNum < len(prevResult) {
-				n := c.addDummyCommandResponse(c.evalExpr, index, prevResult[paramNum])
+				n := c.addDummyCommandResponse(evalExpr, index, prevResult[paramNum])
 				newRes = append(newRes, IndexValue{index: paramNum, value: n})
 			}
 		}
@@ -68,7 +67,7 @@ func (c *cmd) execCommand(index int, prevResult []string, newRes []IndexValue) [
 	if result.Stderr != "" {
 		c.log.Info(fmt.Sprintf("Failed to execute command %s\n %s", result.Stderr, currentCmd))
 	}
-	return []string{c.addDummyCommandResponse(c.evalExpr, index, result.Stdout)}
+	return []string{c.addDummyCommandResponse(evalExpr, index, result.Stdout)}
 }
 
 func (c *cmd) execCmdWithParams(arr []IndexValue, index int, prevResHolder []IndexValue, currCommand string, resArr []string) []string {
@@ -104,15 +103,15 @@ func (c *cmd) execShellCmd(prevResHolder []IndexValue, resArr []string, currComm
 }
 
 //evalExpression expression eval as cartesian product
-func (c *cmd) evalExpression(commandRes []string, commResSize int, permutationArr []string, testFailure int) (int, error) {
+func (c *cmd) evalExpression(commandRes []string, commResSize int, permutationArr []string, testFailure int, evalExpr string) (int, error) {
 	if len(commandRes) == 0 {
-		return c.evalCommand(permutationArr, testFailure)
+		return c.evalCommand(permutationArr, testFailure, evalExpr)
 	}
 	outputs := strings.Split(utils.RemoveNewLineSuffix(commandRes[0]), "\n")
 	for _, o := range outputs {
 		permutationArr = append(permutationArr, o)
 		var err error
-		testFailure, err = c.evalExpression(commandRes[1:commResSize], commResSize-1, permutationArr, testFailure)
+		testFailure, err = c.evalExpression(commandRes[1:commResSize], commResSize-1, permutationArr, testFailure, evalExpr)
 		if err != nil || testFailure > 0 {
 			return testFailure, err
 		}
@@ -121,9 +120,9 @@ func (c *cmd) evalExpression(commandRes []string, commResSize int, permutationAr
 	return testFailure, nil
 }
 
-func (c *cmd) evalCommand(permutationArr []string, testExec int) (int, error) {
+func (c *cmd) evalCommand(permutationArr []string, testExec int, evalExpr string) (int, error) {
 	// build command expression with params
-	expr := c.cmdExprBuilder(permutationArr, c.evalExpr)
+	expr := c.cmdExprBuilder(permutationArr, evalExpr)
 	testExec++
 	// eval command expression
 	testSucceeded, err := evalCommandExpr(strings.ReplaceAll(expr, common.EmptyValue, ""))
