@@ -164,3 +164,50 @@ func ValidParamData(param string) (bool, string) {
 	NumRegexp := regexp.MustCompile(`\d`)
 	return NumRegexp.MatchString(num), num
 }
+
+//ReadPolicyExpr validate param char
+func ReadPolicyExpr(policyExpr string) (*PolicyEvalParams, error) {
+	start := strings.Index(policyExpr, "[")
+	end := strings.Index(policyExpr, "]")
+	if start == -1 || end == -1 {
+		return nil, fmt.Errorf("eval expr do not include policy")
+	}
+	val := policyExpr[start+1 : end]
+	args := strings.Split(val, "MATCH")
+	if len(args) == 2 {
+		pep := &PolicyEvalParams{}
+		var err error
+		queryArgs := strings.Split(args[1], "QUERY")
+		if len(queryArgs) == 2 {
+			pep.PolicyQueryParam = strings.TrimSpace(queryArgs[1])
+		}
+		pep.PolicyName = strings.TrimSpace(queryArgs[0])
+		param := strings.TrimSpace(args[0])
+		if valid, value := ValidParamData(param); valid {
+			pep.EvalParamNum, err = strconv.Atoi(value)
+			if err != nil {
+				return nil, err
+			}
+
+			return pep, nil
+		}
+	}
+	return nil, fmt.Errorf("eval expr do not include policy")
+}
+
+//GetPolicyExpr return policy expr
+func GetPolicyExpr(policyExpr string) string {
+	start := strings.Index(policyExpr, "[")
+	end := strings.Index(policyExpr, "]")
+	if start == -1 || end == -1 {
+		return ""
+	}
+	return policyExpr[start : end+1]
+}
+
+//PolicyEvalParams hold eval expr policy params
+type PolicyEvalParams struct {
+	PolicyName       string
+	PolicyQueryParam string
+	EvalParamNum     int
+}

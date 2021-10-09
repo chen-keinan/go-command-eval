@@ -124,3 +124,18 @@ func Test_ValidParam(t *testing.T) {
 	assert.Equal(t, "2", num)
 
 }
+
+func Test_ReadPolicyExpr(t *testing.T) {
+	evalExpr := "'${0}' != '';&& [${0} MATCH no_permission.policy QUERY example.deny]"
+	policy, err := ReadPolicyExpr(evalExpr)
+	assert.NoError(t, err)
+	assert.Equal(t, policy.PolicyName, "no_permission.policy")
+	assert.Equal(t, policy.PolicyQueryParam, "example.deny")
+	assert.Equal(t, policy.EvalParamNum, 0)
+}
+
+func Test_GetPolicyExpr(t *testing.T) {
+	evalExpr := "'${0}' == 'root:root'; && [${0} MATCH no_deny.policy]"
+	policyExpr := GetPolicyExpr(evalExpr)
+	assert.Equal(t, policyExpr, "[${0} MATCH no_deny.policy]")
+}
