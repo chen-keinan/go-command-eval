@@ -80,10 +80,10 @@ func (cv commandEvaluate) evalPolicy(commands []string, cmdExec cmd, evalExpr st
 	if val, ok := resMap[compareComm]; ok {
 		for _, cmdRes := range val {
 			res, err := validator.NewPolicyEval().EvaluatePolicy(propertyEval, policy, cmdRes)
-			policyEvalResults = append(policyEvalResults, res...)
 			if err != nil {
-				return 0, err
+				res = []*validator.ValidateResult{{Value: false}}
 			}
+			policyEvalResults = append(policyEvalResults, res...)
 		}
 		for _, per := range policyEvalResults {
 			if !per.Value {
