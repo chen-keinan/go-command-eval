@@ -58,10 +58,10 @@ func (cv commandEvaluate) EvalCommandPolicy(commands []string, evalExpr string, 
 	if err != nil {
 		return CmdEvalResult{Match: false, Error: err}
 	}
-	return CmdEvalResult{Match: val == 0, Error: err}
+	return CmdEvalResult{Match: val.EvalExpResult == 0, Error: err, PolicyResult: val.PolicyResult}
 }
 
-func (cv commandEvaluate) evalPolicy(commands []string, cmdExec cmd, evalExpr string, policy string, compareComm int, propertyEval ...string) (int, error) {
+func (cv commandEvaluate) evalPolicy(commands []string, cmdExec cmd, evalExpr string, policy string, compareComm int, propertyEval ...string) (FinalResult, error) {
 	resMap := make(map[int][]string)
 	cmdTotalRes := make([]string, 0)
 	var commNum = 0
@@ -93,12 +93,14 @@ func (cv commandEvaluate) evalPolicy(commands []string, cmdExec cmd, evalExpr st
 		}
 	}
 	match := policyRes == 0
-	PolicyExpr := utils.GetPolicyExpr(evalExpr)
-	if len(PolicyExpr) == len(evalExpr) {
-		return policyRes, nil
+	policyExpr := utils.GetPolicyExpr(evalExpr)
+	if len(policyExpr) == len(evalExpr) {
+		return FinalResult{EvalExpResult: policyRes, PolicyResult: policyEvalResults}, nil
 	}
-	neweEvalExpr := strings.Replace(evalExpr, PolicyExpr, fmt.Sprintf("'true' == '%s'", strconv.FormatBool(match)), -1)
-	return cmdExec.evalExpression(cmdTotalRes, len(cmdTotalRes), make([]string, 0), 0, neweEvalExpr)
+	neweEvalExpr := strings.Replace(evalExpr, policyExpr, fmt.Sprintf("'true' == '%s'", strconv.FormatBool(match)), -1)
+	evalExpResult, err := cmdExec.evalExpression(cmdTotalRes, len(cmdTotalRes), make([]string, 0), 0, neweEvalExpr)
+	return FinalResult{EvalExpResult: evalExpResult, PolicyResult: policyEvalResults}, err
+
 }
 
 func (cv commandEvaluate) evalCommand(commands []string, cmdExec cmd, evalExpr string) (int, error) {
@@ -117,7 +119,14 @@ func (cv commandEvaluate) evalCommand(commands []string, cmdExec cmd, evalExpr s
 
 //CmdEvalResult command result object
 type CmdEvalResult struct {
-	Match       bool
-	CmdEvalExpr string
-	Error       error
+	Match        bool
+	CmdEvalExpr  string
+	PolicyResult []*validator.ValidateResult
+	Error        error
+}
+
+//FinalResult  eval result object
+type FinalResult struct {
+	EvalExpResult int
+	PolicyResult  []*validator.ValidateResult
 }
