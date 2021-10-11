@@ -126,16 +126,40 @@ func Test_ValidParam(t *testing.T) {
 }
 
 func Test_ReadPolicyExpr(t *testing.T) {
-	evalExpr := "'${0}' != '';&& [${0} MATCH no_permission.policy QUERY example.deny]"
+	evalExpr := "'${0}' != '';&& [${0} MATCH no_permission.policy QUERY example.policy_eval RETURN allow]"
+	policy, err := ReadPolicyExpr(evalExpr)
+	assert.NoError(t, err)
+	assert.Equal(t, policy.PolicyName, "no_permission.policy")
+	assert.Equal(t, policy.PolicyQueryParam, "example.policy_eval")
+	assert.Equal(t, policy.EvalParamNum, 0)
+}
+
+func Test_ReadPolicyExprwithReturn(t *testing.T) {
+	evalExpr := "'${0}' != '';&& [${0} MATCH no_permission.policy QUERY example.deny RETURN allow_policy,namespace]"
 	policy, err := ReadPolicyExpr(evalExpr)
 	assert.NoError(t, err)
 	assert.Equal(t, policy.PolicyName, "no_permission.policy")
 	assert.Equal(t, policy.PolicyQueryParam, "example.deny")
 	assert.Equal(t, policy.EvalParamNum, 0)
+	assert.Equal(t, len(policy.ReturnKeys), 2)
 }
 
 func Test_GetPolicyExpr(t *testing.T) {
 	evalExpr := "'${0}' == 'root:root'; && [${0} MATCH no_deny.policy]"
 	policyExpr := GetPolicyExpr(evalExpr)
 	assert.Equal(t, policyExpr, "[${0} MATCH no_deny.policy]")
+}
+
+func Test_MatchPolicySingleReturn(t *testing.T) {
+	policyValues := true
+	returnData := []string{"allow"}
+	mpr := MatchPolicy(policyValues, returnData)
+	assert.Equal(t, mpr.ReturnValues["allow"], "true")
+}
+
+func Test_MatchPolicySingleMulti(t *testing.T) {
+	policyValues := map[string]interface{}{"allow": true}
+	returnData := []string{"allow"}
+	mpr := MatchPolicy(policyValues, returnData)
+	assert.Equal(t, mpr.ReturnValues["allow"], "true")
 }

@@ -2,7 +2,7 @@ module github.com/chen-keinan/go-command-eval
 
 go 1.16
 
-replace github.com/chen-keinan/go-opa-validate => github.com/chen-keinan/go-opa-validate v0.0.5
+replace github.com/chen-keinan/go-opa-validate => github.com/chen-keinan/go-opa-validate v0.0.6
 
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible

@@ -179,7 +179,9 @@ func ReadPolicyExpr(policyExpr string) (*PolicyEvalParams, error) {
 		var err error
 		queryArgs := strings.Split(args[1], "QUERY")
 		if len(queryArgs) == 2 {
-			pep.PolicyQueryParam = strings.TrimSpace(queryArgs[1])
+			queryArgsReturn := strings.Split(queryArgs[1], "RETURN")
+			pep.PolicyQueryParam = strings.TrimSpace(queryArgsReturn[0])
+			pep.ReturnKeys = strings.Split(queryArgsReturn[1], ",")
 		}
 		pep.PolicyName = strings.TrimSpace(queryArgs[0])
 		param := strings.TrimSpace(args[0])
@@ -210,4 +212,39 @@ type PolicyEvalParams struct {
 	PolicyName       string
 	PolicyQueryParam string
 	EvalParamNum     int
+	ReturnKeys       []string
+}
+
+//MatchPolicy match policies results against expected return fields
+func MatchPolicy(evalResult interface{}, returnKeys []string) PolicyResult {
+	switch t := evalResult.(type) {
+	case bool:
+		boolValue := strconv.FormatBool(t)
+		return PolicyResult{ReturnValues: map[string]string{"allow": boolValue}}
+	case map[string]interface{}:
+		pr := PolicyResult{ReturnValues: make(map[string]string)}
+		for _, rv := range returnKeys {
+			key := strings.TrimSpace(rv)
+			if key == "allow" {
+				b, ok := t[key].(bool)
+				if ok {
+					boolValue := strconv.FormatBool(b)
+					pr.ReturnValues[key] = boolValue
+				}
+				continue
+			}
+			s, ok := t[key].(string)
+			if ok {
+				pr.ReturnValues[key] = s
+			}
+		}
+		return pr
+	default:
+		return PolicyResult{ReturnValues: map[string]string{"allow": "false"}}
+	}
+}
+
+//PolicyResult hold policy eval result
+type PolicyResult struct {
+	ReturnValues map[string]string
 }

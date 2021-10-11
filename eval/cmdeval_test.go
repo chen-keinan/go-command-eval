@@ -32,14 +32,21 @@ func TestEvalCommand(t *testing.T) {
 	}
 }
 
-const policy = `package example
-default deny = false
-deny {
+const NotAllowPolicy = `package itsio
+policy_eval :={"name":namespace_name,"allow":allow_policy} {
+	namespace_name:= input.metadata.namespace
+    input.kind == "Pod"
 	some i
-	input.kind == "Pod"
-	image := input.spec.containers[i].image
-	not startswith(image, "kalpine")
-}`
+	allow_policy := input.spec.containers[i].imagePullPolicy == "Always"
+  }
+`
+
+const AllowPolicy = `package itsio
+policy_eval :={"name":namespace_name,"allow":allow_policy} {
+	namespace_name:= input.metadata.namespace
+	allow_policy := namespace_name == "default"
+  }
+`
 
 func TestEvalPolicy(t *testing.T) {
 	res := NewEvalCmd()
@@ -50,12 +57,12 @@ func TestEvalPolicy(t *testing.T) {
 		policy   string
 		want     bool
 	}{
-		{name: "two command and deny policy match", evalExpr: "'${0}' != '';&& [${1} MATCH no_permission.policy QUERY example.deny]", cmd: []string{"kubectl get pods --no-headers -o custom-columns=\":metadata.name\"",
+		{name: "two command and deny policy match", evalExpr: "'${0}' != '';&& [${1} MATCH no_permission.policy QUERY itsio.policy_eval RETURN allow,name]", cmd: []string{"kubectl get pods --no-headers -o custom-columns=\":metadata.name\"",
 			"kubectl get pod ${0} -o json"},
-			policy: policy, want: true},
-		{name: "two command and deny policy expr not match", evalExpr: "'${0}' == '';&& [${1} MATCH no_permission.policy QUERY example.deny]", cmd: []string{"kubectl get pods --no-headers -o custom-columns=\":metadata.name\"",
+			policy: AllowPolicy, want: true},
+		{name: "two command and deny policy expr not match", evalExpr: "'${0}' == '';&& [${1} MATCH no_permission.policy QUERY itsio.policy_eval RETURN allow,name]", cmd: []string{"kubectl get pods --no-headers -o custom-columns=\":metadata.name\"",
 			"kubectl get pod ${0} -o json"},
-			policy: policy, want: false},
+			policy: NotAllowPolicy, want: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

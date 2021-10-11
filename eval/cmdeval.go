@@ -54,14 +54,52 @@ func (cv commandEvaluate) EvalCommandPolicy(commands []string, evalExpr string, 
 	if err != nil {
 		return CmdEvalResult{Match: false}
 	}
-	val, err := cv.evalPolicy(commands, cmdExec, evalExpr, policy, pep.EvalParamNum, []string{pep.PolicyQueryParam}...)
+	val, err := cv.evalPolicy(commands, cmdExec, evalExpr, policy, pep.EvalParamNum, []string{pep.PolicyQueryParam}, pep.ReturnKeys)
 	if err != nil {
 		return CmdEvalResult{Match: false, Error: err}
 	}
 	return CmdEvalResult{Match: val.EvalExpResult == 0, Error: err, PolicyResult: val.PolicyResult}
 }
 
-func (cv commandEvaluate) evalPolicy(commands []string, cmdExec cmd, evalExpr string, policy string, compareComm int, propertyEval ...string) (FinalResult, error) {
+func (cv commandEvaluate) evalPolicy(commands []string, cmdExec cmd, evalExpr string, policy string, compareComm int, propertyEval []string, ReturnFields []string) (*FinalResult, error) {
+	resMap, cmdTotalRes := cv.ExecCommands(commands, cmdExec, evalExpr)
+	policyEvalResults := make([]utils.PolicyResult, 0)
+	var policyRes int
+	if val, ok := resMap[compareComm]; ok {
+		for _, cmdRes := range val {
+			res, err := validator.NewPolicyEval().EvaluatePolicy(propertyEval, policy, cmdRes)
+			if err != nil {
+				return nil, err
+			}
+			policyResult := utils.MatchPolicy(res[0].ExpressionValue[0].Value, ReturnFields)
+			policyEvalResults = append(policyEvalResults, policyResult)
+		}
+		for _, per := range policyEvalResults {
+			if returnVal, ok := per.ReturnValues["allow"]; ok {
+				val, err := strconv.ParseBool(returnVal)
+				if err != nil {
+					continue
+				}
+				if !val {
+					policyRes = 1
+					break
+				}
+			}
+		}
+	}
+	match := policyRes == 0
+	policyExpr := utils.GetPolicyExpr(evalExpr)
+	if len(policyExpr) == len(evalExpr) {
+		return &FinalResult{EvalExpResult: policyRes, PolicyResult: policyEvalResults}, nil
+	}
+	neweEvalExpr := strings.Replace(evalExpr, policyExpr, fmt.Sprintf("'true' == '%s'", strconv.FormatBool(match)), -1)
+	evalExpResult, err := cmdExec.evalExpression(cmdTotalRes, len(cmdTotalRes), make([]string, 0), 0, neweEvalExpr)
+	return &FinalResult{EvalExpResult: evalExpResult, PolicyResult: policyEvalResults}, err
+
+}
+
+//ExecCommands execute shell commands and encapsulate it results
+func (cv commandEvaluate) ExecCommands(commands []string, cmdExec cmd, evalExpr string) (map[int][]string, []string) {
 	resMap := make(map[int][]string)
 	cmdTotalRes := make([]string, 0)
 	var commNum = 0
@@ -75,32 +113,7 @@ func (cv commandEvaluate) evalPolicy(commands []string, cmdExec cmd, evalExpr st
 		cmdTotalRes = append(cmdTotalRes, sb.String())
 		commNum++
 	}
-	policyEvalResults := make([]*validator.ValidateResult, 0)
-	var policyRes int
-	if val, ok := resMap[compareComm]; ok {
-		for _, cmdRes := range val {
-			res, err := validator.NewPolicyEval().EvaluatePolicy(propertyEval, policy, cmdRes)
-			if err != nil {
-				res = []*validator.ValidateResult{{Value: false}}
-			}
-			policyEvalResults = append(policyEvalResults, res...)
-		}
-		for _, per := range policyEvalResults {
-			if !per.Value {
-				policyRes = 1
-				break
-			}
-		}
-	}
-	match := policyRes == 0
-	policyExpr := utils.GetPolicyExpr(evalExpr)
-	if len(policyExpr) == len(evalExpr) {
-		return FinalResult{EvalExpResult: policyRes, PolicyResult: policyEvalResults}, nil
-	}
-	neweEvalExpr := strings.Replace(evalExpr, policyExpr, fmt.Sprintf("'true' == '%s'", strconv.FormatBool(match)), -1)
-	evalExpResult, err := cmdExec.evalExpression(cmdTotalRes, len(cmdTotalRes), make([]string, 0), 0, neweEvalExpr)
-	return FinalResult{EvalExpResult: evalExpResult, PolicyResult: policyEvalResults}, err
-
+	return resMap, cmdTotalRes
 }
 
 func (cv commandEvaluate) evalCommand(commands []string, cmdExec cmd, evalExpr string) (int, error) {
@@ -121,12 +134,12 @@ func (cv commandEvaluate) evalCommand(commands []string, cmdExec cmd, evalExpr s
 type CmdEvalResult struct {
 	Match        bool
 	CmdEvalExpr  string
-	PolicyResult []*validator.ValidateResult
+	PolicyResult []utils.PolicyResult
 	Error        error
 }
 
 //FinalResult  eval result object
 type FinalResult struct {
 	EvalExpResult int
-	PolicyResult  []*validator.ValidateResult
+	PolicyResult  []utils.PolicyResult
 }
