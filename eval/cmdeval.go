@@ -66,12 +66,17 @@ func (cv commandEvaluate) evalPolicy(commands []string, cmdExec cmd, evalExpr st
 	policyEvalResults := make([]utils.PolicyResult, 0)
 	var policyRes int
 	if val, ok := resMap[compareComm]; ok {
+		var policyResult utils.PolicyResult
 		for _, cmdRes := range val {
 			res, err := validator.NewPolicyEval().EvaluatePolicy(propertyEval, policy, cmdRes)
 			if err != nil {
 				return nil, err
 			}
-			policyResult := utils.MatchPolicy(res[0].ExpressionValue[0].Value, ReturnFields)
+			if len(res) > 0 {
+				policyResult = utils.MatchPolicy(res[0].ExpressionValue[0].Value, ReturnFields)
+			} else {
+				policyResult = utils.PolicyResult{ReturnValues: map[string]string{"allow": "false"}}
+			}
 			policyEvalResults = append(policyEvalResults, policyResult)
 		}
 		for _, per := range policyEvalResults {
