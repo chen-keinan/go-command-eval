@@ -80,7 +80,7 @@ func (cv commandEvaluate) evalPolicy(commands []string, cmdExec cmd, evalExpr st
 			policyEvalResults = append(policyEvalResults, policyResult)
 		}
 		for _, per := range policyEvalResults {
-			if returnVal, ok := per.ReturnValues["allow"]; ok {
+			if returnVal, ok := per.ReturnValues["match"]; ok {
 				val, err := strconv.ParseBool(returnVal)
 				if err != nil {
 					continue

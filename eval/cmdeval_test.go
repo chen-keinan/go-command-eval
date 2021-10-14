@@ -57,10 +57,10 @@ func TestEvalPolicy(t *testing.T) {
 		policy   string
 		want     bool
 	}{
-		{name: "two command and deny policy match", evalExpr: "'${0}' != '';&& [${1} MATCH no_permission.policy QUERY itsio.policy_eval RETURN allow,name]", cmd: []string{"kubectl get pods --no-headers -o custom-columns=\":metadata.name\"",
+		{name: "two command and deny policy match", evalExpr: "'${0}' != '';&& [${1} MATCH no_permission.policy QUERY itsio.policy_eval RETURN match,name]", cmd: []string{"kubectl get pods --no-headers -o custom-columns=\":metadata.name\"",
 			"kubectl get pod ${0} -o json"},
 			policy: AllowPolicy, want: true},
-		{name: "two command and deny policy expr not match", evalExpr: "'${0}' == '';&& [${1} MATCH no_permission.policy QUERY itsio.policy_eval RETURN allow,name]", cmd: []string{"kubectl get pods --no-headers -o custom-columns=\":metadata.name\"",
+		{name: "two command and deny policy expr not match", evalExpr: "'${0}' == '';&& [${1} MATCH no_permission.policy QUERY itsio.policy_eval RETURN match,name]", cmd: []string{"kubectl get pods --no-headers -o custom-columns=\":metadata.name\"",
 			"kubectl get pod ${0} -o json"},
 			policy: NotAllowPolicy, want: false},
 	}
