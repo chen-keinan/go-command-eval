@@ -75,7 +75,7 @@ func (cv commandEvaluate) evalPolicy(commands []string, cmdExec cmd, evalExpr st
 			if len(res) > 0 {
 				policyResult = utils.MatchPolicy(res[0].ExpressionValue[0].Value, ReturnFields)
 			} else {
-				policyResult = utils.PolicyResult{ReturnValues: map[string]string{"allow": "false"}}
+				policyResult = utils.PolicyResult{ReturnValues: map[string]string{"match": "false"}}
 			}
 			policyEvalResults = append(policyEvalResults, policyResult)
 		}

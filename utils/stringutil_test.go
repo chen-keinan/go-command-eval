@@ -152,14 +152,14 @@ func Test_GetPolicyExpr(t *testing.T) {
 
 func Test_MatchPolicySingleReturn(t *testing.T) {
 	policyValues := true
-	returnData := []string{"allow"}
+	returnData := []string{"match"}
 	mpr := MatchPolicy(policyValues, returnData)
-	assert.Equal(t, mpr.ReturnValues["allow"], "true")
+	assert.Equal(t, mpr.ReturnValues["match"], "true")
 }
 
 func Test_MatchPolicySingleMulti(t *testing.T) {
-	policyValues := map[string]interface{}{"allow": true}
-	returnData := []string{"allow"}
+	policyValues := map[string]interface{}{"match": true}
+	returnData := []string{"match"}
 	mpr := MatchPolicy(policyValues, returnData)
-	assert.Equal(t, mpr.ReturnValues["allow"], "true")
+	assert.Equal(t, mpr.ReturnValues["match"], "true")
 }

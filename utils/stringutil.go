@@ -220,12 +220,12 @@ func MatchPolicy(evalResult interface{}, returnKeys []string) PolicyResult {
 	switch t := evalResult.(type) {
 	case bool:
 		boolValue := strconv.FormatBool(t)
-		return PolicyResult{ReturnValues: map[string]string{"allow": boolValue}}
+		return PolicyResult{ReturnValues: map[string]string{"match": boolValue}}
 	case map[string]interface{}:
 		pr := PolicyResult{ReturnValues: make(map[string]string)}
 		for _, rv := range returnKeys {
 			key := strings.TrimSpace(rv)
-			if key == "allow" {
+			if key == "match" {
 				b, ok := t[key].(bool)
 				if ok {
 					boolValue := strconv.FormatBool(b)
@@ -240,7 +240,7 @@ func MatchPolicy(evalResult interface{}, returnKeys []string) PolicyResult {
 		}
 		return pr
 	default:
-		return PolicyResult{ReturnValues: map[string]string{"allow": "false"}}
+		return PolicyResult{ReturnValues: map[string]string{"match": "false"}}
 	}
 }
 

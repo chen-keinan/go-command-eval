@@ -33,7 +33,7 @@ func TestEvalCommand(t *testing.T) {
 }
 
 const NotAllowPolicy = `package itsio
-policy_eval :={"name":namespace_name,"allow":allow_policy} {
+policy_eval :={"name":namespace_name,"match":allow_policy} {
 	namespace_name:= input.metadata.namespace
     input.kind == "Pod"
 	some i
@@ -42,7 +42,7 @@ policy_eval :={"name":namespace_name,"allow":allow_policy} {
 `
 
 const AllowPolicy = `package itsio
-policy_eval :={"name":namespace_name,"allow":allow_policy} {
+policy_eval :={"name":namespace_name,"match":allow_policy} {
 	namespace_name:= input.metadata.namespace
 	allow_policy := namespace_name == "default"
   }
