@@ -51,22 +51,26 @@ policy_eval :={"name":namespace_name,"match":allow_policy} {
 func TestEvalPolicy(t *testing.T) {
 	res := NewEvalCmd()
 	tests := []struct {
-		name     string
-		cmd      []string
-		evalExpr string
-		policy   string
-		want     bool
+		name       string
+		cmd        []string
+		evalExpr   string
+		policy     string
+		want       bool
+		returnKeys string
 	}{
 		{name: "two command and deny policy match", evalExpr: "'${0}' != '';&& [${1} MATCH no_permission.policy QUERY itsio.policy_eval RETURN match,name]", cmd: []string{"kubectl get pods --no-headers -o custom-columns=\":metadata.name\"",
 			"kubectl get pod ${0} -o json"},
-			policy: AllowPolicy, want: true},
+			policy: AllowPolicy, want: true, returnKeys: "match"},
 		{name: "two command and deny policy expr not match", evalExpr: "'${0}' == '';&& [${1} MATCH no_permission.policy QUERY itsio.policy_eval RETURN match,name]", cmd: []string{"kubectl get pods --no-headers -o custom-columns=\":metadata.name\"",
 			"kubectl get pod ${0} -o json"},
-			policy: NotAllowPolicy, want: false},
+			policy: NotAllowPolicy, want: false, returnKeys: "match"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := res.EvalCommandPolicy(tt.cmd, tt.evalExpr, tt.policy); got.Match != tt.want {
+				t.Errorf("TestEvalPolicy() = %v, want %v err %v", got, tt.want, got.Error)
+			}
+			if got := res.EvalCommandPolicy(tt.cmd, tt.evalExpr, tt.policy); got.ReturnKeys[0] == tt.returnKeys {
 				t.Errorf("TestEvalPolicy() = %v, want %v err %v", got, tt.want, got.Error)
 			}
 		})
