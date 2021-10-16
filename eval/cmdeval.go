@@ -54,33 +54,33 @@ func (cv commandEvaluate) EvalCommandPolicy(commands []string, evalExpr string, 
 	if err != nil {
 		return CmdEvalResult{Match: false}
 	}
-	val, err := cv.evalPolicy(commands, cmdExec, evalExpr, policy, pep.EvalParamNum, []string{pep.PolicyQueryParam}, pep.ReturnKeys)
+	val, err := cv.evalPolicy(commands, cmdExec, evalExpr, policy, pep)
 	if err != nil {
 		return CmdEvalResult{Match: false, Error: err}
 	}
-	return CmdEvalResult{Match: val.EvalExpResult == 0, Error: err, PolicyResult: val.PolicyResult}
+	return CmdEvalResult{Match: val.EvalExpResult == 0, Error: err, PolicyResult: val.PolicyResult, ReturnKeys: pep.ReturnKeys}
 }
 
-func (cv commandEvaluate) evalPolicy(commands []string, cmdExec cmd, evalExpr string, policy string, compareComm int, propertyEval []string, ReturnFields []string) (*FinalResult, error) {
+func (cv commandEvaluate) evalPolicy(commands []string, cmdExec cmd, evalExpr string, policy string, pep *utils.PolicyEvalParams) (*FinalResult, error) {
 	resMap, cmdTotalRes := cv.ExecCommands(commands, cmdExec, evalExpr)
 	policyEvalResults := make([]utils.PolicyResult, 0)
 	var policyRes int
-	if val, ok := resMap[compareComm]; ok {
+	if val, ok := resMap[pep.EvalParamNum]; ok {
 		var policyResult utils.PolicyResult
 		for _, cmdRes := range val {
-			res, err := validator.NewPolicyEval().EvaluatePolicy(propertyEval, policy, cmdRes)
+			res, err := validator.NewPolicyEval().EvaluatePolicy([]string{pep.PolicyQueryParam}, policy, cmdRes)
 			if err != nil {
 				return nil, err
 			}
 			if len(res) > 0 {
-				policyResult = utils.MatchPolicy(res[0].ExpressionValue[0].Value, ReturnFields)
+				policyResult = utils.MatchPolicy(res[0].ExpressionValue[0].Value, pep.ReturnKeys)
 			} else {
-				policyResult = utils.PolicyResult{ReturnValues: map[string]string{propertyEval[0]: "false"}}
+				policyResult = utils.PolicyResult{ReturnValues: map[string]string{pep.ReturnKeys[0]: "false"}}
 			}
 			policyEvalResults = append(policyEvalResults, policyResult)
 		}
 		for _, per := range policyEvalResults {
-			if returnVal, ok := per.ReturnValues[propertyEval[0]]; ok {
+			if returnVal, ok := per.ReturnValues[pep.ReturnKeys[0]]; ok {
 				val, err := strconv.ParseBool(returnVal)
 				if err != nil {
 					continue
@@ -140,6 +140,7 @@ type CmdEvalResult struct {
 	Match        bool
 	CmdEvalExpr  string
 	PolicyResult []utils.PolicyResult
+	ReturnKeys   []string
 	Error        error
 }
 
