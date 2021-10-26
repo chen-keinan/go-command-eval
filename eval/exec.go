@@ -6,7 +6,7 @@ import (
 )
 
 //ShellToUse bash shell
-const ShellToUse = "bash"
+const ShellToUse = "sh"
 
 //Executor defines the interface for shell command executor
 //exec.go
