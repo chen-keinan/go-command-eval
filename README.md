@@ -24,7 +24,7 @@ go get github.com/chen-keinan/go-command-eval
 
 create shell command which return one result
 ```go
-shellCommands:=[]string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <= 1'"}
+shCmd:=[]string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <= 1'"}
 ```
 evaluate command result with eval expression ( ${0} is the result from 1st shell command) 
 ```go
@@ -35,7 +35,7 @@ evalExpr := "'${0}' == '/etc/hosts'"
 
 create two shell commands with one result for each
 ```go
-shellCommands := []string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <= 1'",
+shCmd := []string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <= 1'",
                     "ls /etc/group | awk -F \" \" '{print $1}' |awk 'FNR <= 1'"}
 ```
 evaluate each command result with eval expression
@@ -47,7 +47,7 @@ evalExpr := "'${0}' == '/etc/hosts'; && '${1}' == '/etc/group';"
 
 create shell command with return two results
 ```go
-shellCommands := []string{"ls /etc | awk -F \" \" '{print $1}' |awk 'FNR <= 2'"}
+shCmd := []string{"ls /etc | awk -F \" \" '{print $1}' |awk 'FNR <= 2'"}
 ```
 evaluate command result with IN Clause eval expression
 ```go
@@ -58,7 +58,7 @@ evalExpr := "'${0}' IN ('afpovertcp.cfg','aliases')"
 
 create tow shell commands 1st command result passed as an arg to the following shell command
 ```go
-shellCommands := []string{"ls /etc/hosts | awk -F " " '{print $1}' |awk 'FNR <= 1'",
+shCmd := []string{"ls /etc/hosts | awk -F " " '{print $1}' |awk 'FNR <= 1'",
                     "stat -f %A" ${0}}
 ```
 both results are evaluated against eval expression 1st result is evaluated as string 
@@ -77,11 +77,11 @@ import (
 )
 
 func main() {
-	shellCommands := []string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <= 1'",
+	shCmd := []string{"ls /etc/hosts | awk -F \" \" '{print $1}' |awk 'FNR <= 1'",
 		"ls /etc/group | awk -F \" \" '{print $1}' |awk 'FNR <= 1'"}
 
 	evalExpr := "'${0}' == '/etc/hosts'; && '${1}' == '/etc/group';"
-	cmdEvalResult := eval.NewEvalCmd().EvalCommand(shellCommands, evalExpr)
+	cmdEvalResult := eval.NewEvalCmd().EvalCommand(shCmd, evalExpr)
 	if cmdEvalResult.Match {
 		fmt.Print("commmand result match eval expression")
 	}
