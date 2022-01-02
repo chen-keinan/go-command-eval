@@ -4,7 +4,7 @@
 [![Gitter](https://badges.gitter.im/beacon-sec/community.svg)](https://gitter.im/beacon-sec/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 <br><img src="./pkg/img/cmd_eval.png" width="300" alt="cmd_eval logo"><br>
-# go-command-eval
+# go-command-eva
 
 Go-command-eval is an open source lib who evaluate shell command results against eval expr.
 
