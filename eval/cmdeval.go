@@ -13,6 +13,7 @@ import (
 type CmdEvaluator interface {
 	EvalCommand(commands []string, evalExpr string) CmdEvalResult
 	EvalCommandPolicy(commands []string, evalExpr string, policy string) CmdEvalResult
+	EvalKubeAPIPolicy(commands []string, evalExpr string, policy string) CmdEvalResult
 }
 
 type commandEvaluate struct {
@@ -50,6 +51,27 @@ func (cv commandEvaluate) EvalCommandPolicy(commands []string, evalExpr string, 
 		return CmdEvalResult{}
 	}
 	cmdExec := cmd{commandParams: commandParams, commandExec: commands, command: NewShellExec(), cmdExprBuilder: utils.UpdateCmdExprParam, log: zlog}
+	pep, err := utils.ReadPolicyExpr(evalExpr)
+	if err != nil {
+		return CmdEvalResult{Match: false}
+	}
+	val, err := cv.evalPolicy(commands, cmdExec, evalExpr, policy, pep)
+	if err != nil {
+		return CmdEvalResult{Match: false, Error: err}
+	}
+	return CmdEvalResult{Match: val.EvalExpResult == 0, Error: err, PolicyResult: val.PolicyResult, ReturnKeys: pep.ReturnKeys}
+}
+
+//EvalKubeAPIPolicy eval kube API return with opa policy
+// accept kube api and policy and property to eval
+// return eval command result
+func (cv commandEvaluate) EvalKubeAPIPolicy(commands []string, evalExpr string, policy string) CmdEvalResult {
+	commandParams := CommandParams(commands)
+	zlog, err := zap.NewProduction()
+	if err != nil {
+		return CmdEvalResult{}
+	}
+	cmdExec := cmd{commandParams: commandParams, commandExec: commands, command: NewKubeClientExec(), cmdExprBuilder: utils.UpdateCmdExprParam, log: zlog}
 	pep, err := utils.ReadPolicyExpr(evalExpr)
 	if err != nil {
 		return CmdEvalResult{Match: false}
