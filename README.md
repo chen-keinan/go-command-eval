@@ -90,5 +90,5 @@ func main() {
 
 
 ## Contribution
-code contribution is welcome !! 
+code contribution is welcome 
 contribution with passing tests and linter is more than welcome :)
