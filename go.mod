@@ -11,6 +11,6 @@ require (
 	github.com/itchyny/gojq v0.12.9
 	github.com/stretchr/testify v1.8.0
 	go.uber.org/zap v1.23.0
-	k8s.io/apimachinery v0.24.2
-	k8s.io/client-go v0.24.2
+	k8s.io/apimachinery v0.26.1
+	k8s.io/client-go v0.26.1
 )
