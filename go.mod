@@ -9,8 +9,8 @@ require (
 	github.com/chen-keinan/go-opa-validate v0.0.0-00010101000000-000000000000
 	github.com/golang/mock v1.6.0
 	github.com/itchyny/gojq v0.12.9
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.24.0
-	k8s.io/apimachinery v0.24.2
+	k8s.io/apimachinery v0.31.0
 	k8s.io/client-go v0.24.2
 )
